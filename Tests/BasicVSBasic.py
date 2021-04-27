@@ -3,9 +3,10 @@ from Players.Bots.BasicBot import BasicBot
 from Graphics.DrawLib import BasicNetworkDrawer
 import psychopy
 
-test_player = BasicBot("Comp1")
+comp1 = BasicBot("Comp1")
+comp2 = BasicBot("Comp2")
 
-test_board = gb.GameBoard([test_player], "Structure/Maps/classic.txt")
+test_board = gb.GameBoard([comp1, comp2], "Structure/Maps/classic.txt")
 
 drawer = BasicNetworkDrawer(test_board.get_map(), test_board._cities)
 win = psychopy.visual.Window(
@@ -18,7 +19,8 @@ win = psychopy.visual.Window(
 moves = 0
 MAX_MOVES = 100
 
-test_player.choose_start_pos(test_board)
+for player in test_board.get_players():
+	player.choose_start_pos(test_board)
 
 game_won = False
 
@@ -33,25 +35,15 @@ while not game_won:
 					valid = True
 		else:
 			game_won = True
-
-		# print("----------")
-		# player.print_nodes_in_network()
-		# print("----------")
-		# player.print_cities_in_network(test_board)
-		# print("----------")
-		# player.print_edges_in_network()
-
-		moves += 1
+	drawer.draw_edges(win)
+	drawer.draw_nodes(win)
+	drawer.draw_cities(win)
+	win.flip()
+	input("Enter to cont...")
+	moves += 1
 
 print("OMFG IT ACTUALLY WORKED")
 print("Moves: " + str(moves))
-
-
-drawer.draw_edges(win)
-drawer.draw_nodes(win)
-drawer.draw_cities(win)
-
-win.flip()
-while 'escape' not in psychopy.event.waitKeys():
-	pass
+input("Press Enter to Exit...")
 win.close()
+quit()
