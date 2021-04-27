@@ -168,9 +168,12 @@ class BasicNetworkDrawer:
 			l = psychopy.visual.Line(
 				win=win,
 				units="pix",
-				lineColor=[-1, -1, -1]
+				lineColor=[0, 0, 0]
 			)
 			if line[2] == 2:
+				l.lineWidth = 3
+			if line[2] == 0:
+				l.lineColor = [0.234, -0.351, 0.437]
 				l.lineWidth = 4
 			l.start = [(line[0][0] * self.X_MUL) + self.X_OFF, (line[0][1] * self.Y_MUL) + self.Y_OFF]
 			l.end = [(line[1][0] * self.X_MUL) + self.X_OFF, (line[1][1] * self.Y_MUL) + self.Y_OFF]

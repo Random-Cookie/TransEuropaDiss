@@ -142,3 +142,8 @@ class GameBoard:
 	def find_distance(self):
 		pass
 	# TODO: implement path find
+
+	@staticmethod
+	def is_valid_move(player, co_ords):
+		return True
+		# TODO: implement valid move check
