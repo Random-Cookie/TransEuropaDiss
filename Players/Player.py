@@ -14,6 +14,11 @@ class Player:
 		self._cities = {}
 
 	def set_cities(self, cities):
+		""" Set cities for a player, any overide must run Player.set_cities()
+
+		:param cities: cities for the player
+		:return: none
+		"""
 		self._cities = cities
 
 	def get_network(self):
@@ -63,6 +68,10 @@ class Player:
 		return ["0000", "0000"]
 
 	def has_won(self):
+		"""Has won function, any override must return Player.has_won(self)
+
+		:return: if player has won
+		"""
 		for city in self._cities:
 			if city not in self._network.nodes:
 				return False
