@@ -113,6 +113,7 @@ class GameBoard:
 				r = random.randint(0, len(city_groups))
 				player_cities.append(city_groups[i][r])
 				city_groups[i].remove(city_groups[i][r])
+			random.shuffle(player_cities)
 			player.set_cities(player_cities)
 
 	def __init__(self, players: [], map_filepath: str):
