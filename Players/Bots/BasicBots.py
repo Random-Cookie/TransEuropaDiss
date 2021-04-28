@@ -189,7 +189,7 @@ class ClosestFirst(Player):
 		self._target_cities = list(lengths.keys())
 
 
-class FurthestFirst(Player):
+class FarthestFirst(Player):
 	def __init__(self, name):
 		Player.__init__(self, name)
 		self._target_cities = []

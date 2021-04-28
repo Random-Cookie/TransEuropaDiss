@@ -14,6 +14,11 @@ class Player:
 		self._cities = {}
 		self.__score = 0
 
+	def reset(self):
+		self._network = Graph()
+		self._cities = {}
+		self.__score = 0
+
 	def set_cities(self, cities):
 		""" Set cities for a player, any overide must run Player.set_cities()
 
@@ -30,11 +35,6 @@ class Player:
 
 	def add_score(self, score):
 		self.__score += score
-
-	def reset(self):
-		self._network = Graph()
-		self._cities = {}
-		self.__score = 0
 
 	def print_nodes_in_network(self):
 		points = NetworkToPoints.get_node_points(self._network)

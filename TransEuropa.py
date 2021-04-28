@@ -3,9 +3,9 @@ from Graphics.DrawLib import BasicNetworkDrawer
 import psychopy
 import networkx
 
-
 class TransEuropa:
-	def __init__(self, players: [], map_filepath: str, debug_level: int, draw: bool = 0):
+	MAX_TURNS = 50
+	def __init__(self, players: [], map_filepath: str, debug_level: int = 0, draw: int = 0):
 		self.__players = players
 		self._map_filepath = map_filepath
 		self.__board = GameBoard(self.__players, self._map_filepath)
@@ -18,6 +18,7 @@ class TransEuropa:
 				fullscr=False,
 				color=[0.9, 0.9, 0.9]
 			)
+		self.dl = debug_level
 		self.turn_count = 0
 
 	def reset_game(self):
@@ -32,9 +33,10 @@ class TransEuropa:
 			player.choose_start_pos(self.__board)
 		game_won = False
 		turns = 0
-		while not game_won:
+		while not game_won and turns < self.MAX_TURNS:
 			turns += 1
-			print("Turn " + str(turns) + ":")
+			if self.dl >= 2:
+				print("Turn " + str(turns) + ":")
 			for player in self.__board.get_players():
 				if not player.has_won() and not game_won:
 					valid = False
@@ -53,7 +55,8 @@ class TransEuropa:
 		for player in self.__players:
 			if player.has_won():
 				print(player.name + " Has Won!!")
-		print("Winning Turn: " + str(turns))
+		if self.dl:
+			print("Winning Turn: " + str(turns))
 		if self.draw:
 			self.draw_board()
 
@@ -81,3 +84,6 @@ class TransEuropa:
 		self.__drawer.draw_nodes(self.__win)
 		self.__drawer.draw_cities(self.__win)
 		self.__win.flip()
+
+	def get_players(self) -> []:
+		return self.__players
