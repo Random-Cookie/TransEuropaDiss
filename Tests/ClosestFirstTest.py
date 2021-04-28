@@ -1,12 +1,14 @@
 import Structure.GameBoard as gb
-from Players.Bots.BasicBots import BasicBot
+from Players.Bots.BasicBots import ClosestFirst
 from Graphics.DrawLib import BasicNetworkDrawer
 import psychopy
 
-comp1 = BasicBot("Comp1")
-comp2 = BasicBot("Comp2")
+no_players = 2
+players = []
+for i in range(0, no_players):
+	players.append(ClosestFirst("Comp " + str(i)))
 
-test_board = gb.GameBoard([comp1, comp2], "Structure/Maps/classic.txt")
+test_board = gb.GameBoard(players, "Structure/Maps/classic.txt")
 
 drawer = BasicNetworkDrawer(test_board.get_map(), test_board._cities)
 win = psychopy.visual.Window(
@@ -42,7 +44,9 @@ while not game_won:
 	input("Enter to cont...")
 	moves += 1
 
-print("OMFG IT ACTUALLY WORKED")
+for player in test_board._players:
+	if player.has_won():
+		print(player.name + " Has Won!!")
 print("Moves: " + str(moves))
 input("Press Enter to Exit...")
 win.close()
