@@ -12,6 +12,7 @@ class Player:
 		self.name = name
 		self._network = Graph()
 		self._cities = {}
+		self.__score = 0
 
 	def set_cities(self, cities):
 		""" Set cities for a player, any overide must run Player.set_cities()
@@ -23,6 +24,17 @@ class Player:
 
 	def get_network(self):
 		return self._network
+
+	def get_score(self):
+		return self.__score
+
+	def add_score(self, score):
+		self.__score += score
+
+	def reset(self):
+		self._network = Graph()
+		self._cities = {}
+		self.__score = 0
 
 	def print_nodes_in_network(self):
 		points = NetworkToPoints.get_node_points(self._network)
@@ -79,9 +91,3 @@ class Player:
 
 	def _score_path(self, a: Node, b: Node, game_board: GameBoard) -> int:
 		return nx.shortest_path_length(game_board.get_map(), a, b)
-
-	def generate_score(self, game_board: GameBoard) -> int:
-		score = 0
-		for i in range(0, len(self._cities) -1):
-			score += self._score_path(self._cities[i], self._cities[i + 1], game_board)
-		return score
