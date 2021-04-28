@@ -1,5 +1,5 @@
 import Structure.GameBoard as gb
-from Players.Bots.BasicBot import BasicBot
+from Players.Bots.BasicBots import BasicBot
 from Graphics.DrawLib import BasicNetworkDrawer
 import psychopy
 
