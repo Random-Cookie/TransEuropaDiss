@@ -10,7 +10,7 @@ def run_games(no_games, players, map_filepath):
 	invalid_games = 0
 	for i in range(0, no_games):
 		print("----------Game " + str(i) + "----------")
-		game = TransEuropa(players, map_filepath, 0, 0)
+		game = TransEuropa(players, map_filepath, DEBUG_LEVEL, 0)
 		game.play_game()
 		if game.turn_count >= game.MAX_TURNS:
 			invalid_games += 1
@@ -38,23 +38,24 @@ def aggregate_results(res_to_agg):
 		for i in range(0, len(players)):
 			scores[i] += res[1][i]
 		inv_games += res[2]
-	draws = scores[len(scores) - 1]
-	for i in range(0, len(scores) - 1):
-		scores[i] -= draws
+	if len(players) > 2:
+		players.remove(players[len(players) - 1])
+		scores.remove(scores[len(scores) - 1])
+	else:
+		draws = scores[len(scores) - 1]
+		for i in range(0, len(scores) - 1):
+			scores[i] -= draws
 	return [players, scores, inv_games]
 
 
 NO_OF_PROCESSES = 8
-GAMES_PER_PROCESS = 8192
-DEBUG_LEVEL = 0
+GAMES_PER_PROCESS = 32
+DEBUG_LEVEL = 1
 DRAW = 0
 
 start_time = datetime.datetime.now()
 
-params = [(GAMES_PER_PROCESS, [ClosestFirst("Closest First"), FarthestFirst("Farthest First")], "Structure/Maps/classic.txt")] * NO_OF_PROCESSES
-games = [GAMES_PER_PROCESS] * NO_OF_PROCESSES
-player_groups = [ClosestFirst("Closest First"), FarthestFirst("Farthest First")] * NO_OF_PROCESSES
-map_filepaths = ["Structure/Maps/classic.txt"] * NO_OF_PROCESSES
+params = [(GAMES_PER_PROCESS, [ClosestFirst("Closest First"), FarthestFirst("Farthest First"), NetMergeFirst("NetMerge First", 5)], "Structure/Maps/classic.txt")] * NO_OF_PROCESSES
 results = []
 if __name__ == '__main__':
 	with Pool(NO_OF_PROCESSES) as p:
@@ -76,7 +77,7 @@ if __name__ == '__main__':
 	for i in range(0, len(results)):
 		labels.append(str(results[1][i]) + " (" + str(round((results[1][i] / total_games) * 100, 2)) + "%)")
 	plt.pie(results[1], labels=labels)
-	plt.title("Closest First Vs. Farthest First (" + str(total_games) + " Games)")
+	plt.title(params[0][1][0].name + " Vs. " + params[0][1][1].name + " (" + str(total_games) + " Games)")
 	plt.legend(results[0], loc='center left', bbox_to_anchor=(0.98, 0.1))
 	plt.savefig("figs/fig" + str((datetime.datetime.now() - datetime.datetime(1970, 1, 1)).total_seconds()) + ".png")
 	plt.show()

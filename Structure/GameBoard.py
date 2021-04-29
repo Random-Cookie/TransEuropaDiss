@@ -110,7 +110,7 @@ class GameBoard:
 		for player in self._players:
 			player_cities = []
 			for i in range(0, len(city_groups)):
-				r = random.randint(0, len(city_groups) - 1)
+				r = random.randint(0, len(city_groups[i]) - 1)
 				player_cities.append(city_groups[i][r])
 				city_groups[i].remove(city_groups[i][r])
 			random.shuffle(player_cities)
