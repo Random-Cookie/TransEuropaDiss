@@ -37,14 +37,16 @@ class TransEuropa:
 			turns += 1
 			if self.dl >= 2:
 				print("Turn " + str(turns) + ":")
+				if turns > 45:
+					pass
 			for player in self.__board.get_players():
 				if not player.has_won() and not game_won:
-					valid = False
-					while not valid:
+					valid = 0
+					while valid < 2 and not player.has_won():
 						co_ords = player.make_move(self.__board)
 						if self.__board.is_valid_move(player, co_ords):
 							player.add_node_to_network(self.__board, co_ords)
-							valid = True
+							valid += 1
 				else:
 					game_won = True
 				if self.draw == 2:
@@ -54,7 +56,8 @@ class TransEuropa:
 	def end_game(self, turns):
 		for player in self.__players:
 			if player.has_won():
-				print(player.name + " Has Won!!")
+				if self.dl:
+					print(player.name + " Has Won!!")
 		if self.dl:
 			print("Winning Turn: " + str(turns))
 		if self.draw:

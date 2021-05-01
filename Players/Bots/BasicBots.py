@@ -237,3 +237,45 @@ class NetMergeFirst(ClosestFirst):
 				ret_path = list(reversed(shortest[1]))
 				return ret_path
 		return ClosestFirst.get_next_path(self, game_board)
+
+
+class Closestx(ClosestFirst):
+	def __init__(self, name: str, x: int):
+		ClosestFirst.__init__(self, name)
+		self.x = x
+
+	def choose_start_pos(self, game_board: GameBoard) -> str:
+		group_weights = []
+		sublists = self.generate_sublists()
+		rem = 0
+		while rem < len(sublists):
+			if len(sublists[rem]) != self.x:
+				sublists.remove(sublists[rem])
+				rem -= 1
+			rem += 1
+		for i in sublists:
+			path_lengths = []
+			for j in range(0, len(i)):
+				for k in range(0, len(i) - 1):
+					path_lengths.append(networkx.shortest_path_length(game_board.get_map(), i[j], i[k]))
+			while len(path_lengths) > self.x:
+				path_lengths.remove(max(path_lengths))
+			group_weights.append([i, sum(path_lengths)])
+		closest_group = group_weights[0]
+		dist = group_weights[0][1]
+		for i in range(0, len(group_weights)):
+			if group_weights[i][1] < dist:
+				closest_group = group_weights[i]
+				dist = group_weights[i][1]
+		start_city = closest_group[0][0]
+		self._targets.remove(start_city)
+		self.add_start_node(start_city)
+		return start_city.get_id()
+
+	def generate_sublists(self):
+		ret = [[]]
+		for i in range(len(self._cities) + 1):
+			for j in range(i + 1, len(self._cities) + 1):
+				sub = self._cities[i:j]
+				ret.append(sub)
+		return ret

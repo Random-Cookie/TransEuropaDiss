@@ -140,7 +140,7 @@ class GameBoard:
 	def get_edges(self):
 		return self._edges
 
-	def find_distance(self):
+	def ScorePlayers(self):
 		pass
 	# TODO: implement path find
 

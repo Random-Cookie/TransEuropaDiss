@@ -1,5 +1,5 @@
 from Players.Bots.BasicBots import *
-from TransEuropa import TransEuropa
+from Structure.TransEuropa import TransEuropa
 import matplotlib.pyplot as plt
 
 players = [ClosestFirst("Closest First"), FarthestFirst("Farthest First")]
@@ -28,5 +28,5 @@ games_won.append((games_won[0] + games_won[1]) - (no_games - invalid_games))
 plt.bar(player_names, games_won)
 plt.title("Closest First Vs. Farthest First")
 plt.show()
-plt.savefig("/figs/fig1")
+plt.savefig("/out/fig1")
 print("Invalid Games: " + str(invalid_games))
