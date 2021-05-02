@@ -1,6 +1,7 @@
 from Players.Player import Player
 import networkx
 from Structure.GameBoard import GameBoard
+import copy
 
 
 class BasicBot(Player):
@@ -32,7 +33,7 @@ class BasicBot(Player):
 	def set_cities(self, cities):
 		self._cities = cities
 		# make target cities a shallow copy of cities to allow for removal of objects without removing from cities
-		self.target_cities = list(cities)
+		self.target_cities = copy.copy(cities)
 
 	def get_path_to_next_city(self, game_board: GameBoard):
 		paths = networkx.single_source_dijkstra(game_board.get_map(), self.target_cities[0], weight='weight')
@@ -79,7 +80,7 @@ class TrackOptimised(Player):
 	def set_cities(self, cities):
 		Player.set_cities(self, cities)
 		# make target cities a shallow copy of cities to allow for removal of objects without removing from cities
-		self.target_cities = list(cities)
+		self.target_cities = copy.copy(cities)
 
 	def get_path_to_next_city(self, game_board: GameBoard):
 		self.network_merge(game_board)
@@ -121,12 +122,11 @@ class TrackOptimised(Player):
 class ClosestFirst(Player):
 	def __init__(self, name):
 		Player.__init__(self, name)
-		self._targets = []
+		self._target_cities = []
 		self._current_path = []
 
 	def choose_start_pos(self, game_board: GameBoard) -> str:
 		start_city = self._cities[0]
-		self._targets.remove(start_city)
 		self.add_start_node(start_city)
 		return start_city.get_id()
 
@@ -140,21 +140,33 @@ class ClosestFirst(Player):
 	def set_cities(self, cities):
 		Player.set_cities(self, cities)
 		# make target cities a shallow copy of cities to allow for removal of objects without removing from cities
-		self._targets = list(cities)
+		self._target_cities = copy.copy(cities)
 
 	def get_next_path(self, game_board: GameBoard):
 		if self.network_merge(game_board):
 			self._sort_cities(game_board)
-		paths = networkx.single_source_dijkstra(game_board.get_map(), self._targets[0], weight='weight')
+		paths = networkx.single_source_dijkstra(game_board.get_map(), self._target_cities[0], weight='weight')
 		paths = self.collapse_paths(paths)
 		possible_paths = []
 		for path in paths:
-			if path[1][len(path[1]) - 1] in self._network:
+			if (path[1][len(path[1]) - 1] in self._network) and path[2] != 0:
 				possible_paths.append(path)
+		# path filter to remove paths with many nodes in network
+		i = 0
+		while i < len(possible_paths):
+			inter = len(set(possible_paths[i][1]) & set(self._network.nodes))
+			if inter > 1 and len(possible_paths) > 1:
+				possible_paths.remove(possible_paths[i])
+				i -= 1
+			i += 1
 		sorted_paths = sorted(possible_paths, key=lambda tup: tup[2])
+		if len(sorted_paths) <= 0:
+			print("issue")
+			print("issue")
+			print("issue")
+		# if optimal_path[2] == 0:
+		# 	optimal_path = sorted_paths[1]
 		optimal_path = sorted_paths[0]
-		if optimal_path[2] == 0:
-			optimal_path = sorted_paths[1]
 		optimal_path[1].reverse()
 		return optimal_path[1]
 
@@ -168,9 +180,9 @@ class ClosestFirst(Player):
 		return collapsed
 
 	def has_won(self):
-		for city in self._targets:
+		for city in self._target_cities:
 			if city in self._network.nodes:
-				self._targets.remove(city)
+				self._target_cities.remove(city)
 		return Player.has_won(self)
 
 	def network_merge(self, game_board: GameBoard) -> bool:
@@ -180,15 +192,16 @@ class ClosestFirst(Player):
 				if node in self._network:
 					self._network = networkx.compose(self._network, player.get_network())
 					ret = True
+					break
 		return ret
 
 	def _sort_cities(self, game_board: GameBoard):
 		lengths = {}
-		start_city = self._targets[0]
-		for i in range(0, len(self._targets)):
-			lengths[self._targets[i]] = networkx.shortest_path_length(game_board.get_map(), start_city, self._targets[i])
+		start_city = self._target_cities[0]
+		for i in range(0, len(self._target_cities)):
+			lengths[self._target_cities[i]] = networkx.shortest_path_length(game_board.get_map(), start_city, self._target_cities[i])
 		lengths = dict(sorted(lengths.items(), key=lambda item: item[1]))
-		self._targets = list(lengths.keys())
+		self._target_cities = list(lengths.keys())
 
 
 class FarthestFirst(ClosestFirst):
@@ -200,6 +213,7 @@ class FarthestFirst(ClosestFirst):
 		lengths = dict(reversed(sorted(lengths.items(), key=lambda item: item[1])))
 		self._targets = list(lengths.keys())
 
+
 class NetMergeFirst(ClosestFirst):
 	def __init__(self, name, players_to_merge):
 		ClosestFirst.__init__(self, name)
@@ -208,9 +222,9 @@ class NetMergeFirst(ClosestFirst):
 
 	def get_next_path(self, game_board: GameBoard):
 		# trims the added targets from the target list
-		for target in self._targets:
-			if target not in self._cities:
-				self._targets.remove(target)
+		# for target in self._target_cities:
+		# 	if target not in self._cities:
+		# 		self._target_cities.remove(target)
 		if self.network_merge(game_board):
 			self._sort_cities(game_board)
 		if self._connected_players < self._players_to_connect:
@@ -220,7 +234,7 @@ class NetMergeFirst(ClosestFirst):
 					unconnected_players.append(player)
 			path_lengths = []
 			for player in unconnected_players:
-				paths = networkx.single_source_dijkstra(game_board.get_map(), self._targets[0], weight='weight')
+				paths = networkx.single_source_dijkstra(game_board.get_map(), self._target_cities[0], weight='weight')
 				paths = self.collapse_paths(paths)
 				possible_paths = []
 				for path in paths:
@@ -233,7 +247,7 @@ class NetMergeFirst(ClosestFirst):
 				if path[2] < shortest[2] and path[2] > 0:
 					shortest = path
 			if shortest[2] > 0:
-				self._targets.insert(0, shortest[0])
+				self._target_cities.insert(0, shortest[0])
 				ret_path = list(reversed(shortest[1]))
 				return ret_path
 		return ClosestFirst.get_next_path(self, game_board)
@@ -268,7 +282,6 @@ class Closestx(ClosestFirst):
 				closest_group = group_weights[i]
 				dist = group_weights[i][1]
 		start_city = closest_group[0][0]
-		self._targets.remove(start_city)
 		self.add_start_node(start_city)
 		return start_city.get_id()
 
