@@ -3,8 +3,8 @@ from Graphics.DrawLib import BasicNetworkDrawer
 import psychopy
 import networkx
 
+
 class TransEuropa:
-	MAX_TURNS = 50
 	def __init__(self, players: [], map_filepath: str, debug_level: int = 0, draw: int = 0):
 		self.__players = players
 		self._map_filepath = map_filepath
@@ -20,6 +20,7 @@ class TransEuropa:
 			)
 		self.dl = debug_level
 		self.turn_count = 0
+		self.MAX_TURNS = 50
 
 	def reset_game(self):
 		self.__board = GameBoard(self.__players, self._map_filepath)
@@ -32,13 +33,13 @@ class TransEuropa:
 		for player in self.__board.get_players():
 			player.choose_start_pos(self.__board)
 		game_won = False
-		turns = 0
-		while not game_won and turns < self.MAX_TURNS:
-			turns += 1
+		self.turn_count = 0
+		while not game_won and self.turn_count < self.MAX_TURNS:
+			self.turn_count += 1
 			if self.dl >= 2:
-				print("Turn " + str(turns) + ":")
-				if turns > 45:
-					pass
+				print("Turn " + str(self.turn_count) + ":")
+			if self.turn_count >= self.MAX_TURNS - 5:
+				print("Invalid")
 			for player in self.__board.get_players():
 				if not player.has_won() and not game_won:
 					valid = 0
@@ -49,9 +50,9 @@ class TransEuropa:
 							valid += 1
 				else:
 					game_won = True
-				if self.draw == 2:
+				if self.draw >= 2:
 					self.draw_board()
-		self.end_game(turns)
+		self.end_game(self.turn_count)
 
 	def end_game(self, turns):
 		for player in self.__players:
@@ -62,6 +63,8 @@ class TransEuropa:
 			print("Winning Turn: " + str(turns))
 		if self.draw:
 			self.draw_board()
+		if self.draw:
+			self.__win.close()
 
 	def generate_player_scores(self) -> []:
 		for player in self.__players:
