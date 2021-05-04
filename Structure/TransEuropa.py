@@ -38,18 +38,20 @@ class TransEuropa:
 			self.turn_count += 1
 			if self.dl >= 2:
 				print("Turn " + str(self.turn_count) + ":")
-			if self.turn_count >= self.MAX_TURNS - 5:
-				print("Invalid")
+			if self.turn_count >= self.MAX_TURNS:
+				print("MAX TURNS EXCEEDED")
 			for player in self.__board.get_players():
 				if not player.has_won() and not game_won:
 					valid = 0
 					while valid < 2 and not player.has_won():
 						co_ords = player.make_move(self.__board)
 						if co_ords == "w":
+							game_won = True
 							break
-						if self.__board.is_valid_move(player, co_ords):
-							player.add_node_to_network(self.__board, co_ords)
-							valid += 1
+						else:
+							if self.__board.is_valid_move(player, co_ords):
+								player.add_node_to_network(self.__board, co_ords)
+								valid += 1
 				else:
 					game_won = True
 					break
@@ -76,6 +78,7 @@ class TransEuropa:
 			for city in unconnected_cities:
 				paths = networkx.single_source_dijkstra(self.__board, city, weight='weight')
 				paths = self.collapse_paths(paths, player)
+				# TODO
 
 
 	@staticmethod

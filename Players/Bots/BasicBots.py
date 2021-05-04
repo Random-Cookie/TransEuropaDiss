@@ -211,11 +211,11 @@ class ClosestFirst(Player):
 class FarthestFirst(ClosestFirst):
 	def _sort_cities(self, game_board: GameBoard):
 		lengths = {}
-		start_city = self._targets[0]
-		for i in range(0, len(self._targets)):
-			lengths[self._targets[i]] = networkx.shortest_path_length(game_board.get_map(), start_city, self._targets[i])
+		start_city = self._target_cities[0]
+		for i in range(0, len(self._target_cities)):
+			lengths[self._target_cities[i]] = networkx.shortest_path_length(game_board.get_map(), start_city, self._target_cities[i])
 		lengths = dict(reversed(sorted(lengths.items(), key=lambda item: item[1])))
-		self._targets = list(lengths.keys())
+		self._target_cities = list(lengths.keys())
 
 
 class NetMergeFirst(ClosestFirst):
@@ -225,35 +225,28 @@ class NetMergeFirst(ClosestFirst):
 		self._connected_players = 0
 
 	def get_next_path(self, game_board: GameBoard):
-		# trims the added targets from the target list
-		# for target in self._target_cities:
-		# 	if target not in self._cities:
-		# 		self._target_cities.remove(target)
 		if self.network_merge(game_board):
 			self._sort_cities(game_board)
 		if self._connected_players < self._players_to_connect:
 			unconnected_players = []
+			self._connected_players = 0
 			for player in game_board.get_players():
-				if networkx.is_isomorphic(self._network, player.get_network()):
+				if not networkx.is_isomorphic(self._network, player.get_network()):
 					unconnected_players.append(player)
-			path_lengths = []
+				else:
+					self._connected_players += 1
+			shortest_path = [None, None, 0]
 			for player in unconnected_players:
-				paths = networkx.single_source_dijkstra(game_board.get_map(), self._target_cities[0], weight='weight')
-				paths = self.collapse_paths(paths)
-				possible_paths = []
-				for path in paths:
-					if path[1][len(path[1]) - 1] in self._network:
-						possible_paths.append(path)
-				sorted_paths = sorted(possible_paths, key=lambda tup: tup[2])
-				path_lengths.append(sorted_paths[0])
-			shortest = path_lengths[0]
-			for path in path_lengths:
-				if path[2] < shortest[2] and path[2] > 0:
-					shortest = path
-			if shortest[2] > 0:
-				self._target_cities.insert(0, shortest[0])
-				ret_path = list(reversed(shortest[1]))
-				return ret_path
+				player_nodes = player.get_network().nodes
+				for node in player_nodes:
+					player_paths = networkx.single_source_dijkstra(game_board.get_map(), node, weight='weight')
+					player_paths = self.collapse_paths(player_paths)
+					for path in player_paths:
+						if path[1][len(path[1]) - 1] in self._network:
+							if path[2] < shortest_path[2]:
+								shortest_path = path
+			if shortest_path[2] > 0:
+				return shortest_path
 		return ClosestFirst.get_next_path(self, game_board)
 
 
