@@ -14,8 +14,8 @@ class GameDriver:
 		turns = 0
 		invalid_games = 0
 		for i in range(0, no_games):
-			if self.dl or i in self.n_vals:
-				print("----------Game " + str(i) + "----------")
+			if self.dl or (i + 1) in self.n_vals:
+				print("----------Process:" + str(os.getpid()).ljust(6, ' ') + "| Game " + str(i + 1) + "----------")
 			game = TransEuropa(players, map_filepath, self.dl, self.draw)
 			game.play_game()
 			if game.turn_count >= game.MAX_TURNS:

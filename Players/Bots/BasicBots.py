@@ -132,10 +132,15 @@ class ClosestFirst(Player):
 
 	def make_move(self, game_board: GameBoard) -> [str, str]:  # node to add to network should always be first
 		self._current_path = self.get_next_path(game_board)
-		node_in_network_id = self._current_path[0].get_id()
-		next_node_id = self._current_path[1].get_id()
-		self._current_path.remove(self._current_path[0])
-		return [next_node_id, node_in_network_id]
+		if self._current_path != "w":
+			# while self._current_path[1] in self._network.nodes:
+			# 	self._current_path.remove(self._current_path[0])
+			node_in_network_id = self._current_path[0].get_id()
+			next_node_id = self._current_path[1].get_id()
+			self._current_path.remove(self._current_path[0])
+			return [next_node_id, node_in_network_id]
+		else:
+			return "w"
 
 	def set_cities(self, cities):
 		Player.set_cities(self, cities)
@@ -145,30 +150,29 @@ class ClosestFirst(Player):
 	def get_next_path(self, game_board: GameBoard):
 		if self.network_merge(game_board):
 			self._sort_cities(game_board)
-		paths = networkx.single_source_dijkstra(game_board.get_map(), self._target_cities[0], weight='weight')
-		paths = self.collapse_paths(paths)
-		possible_paths = []
-		for path in paths:
-			if (path[1][len(path[1]) - 1] in self._network) and path[2] != 0:
-				possible_paths.append(path)
-		# path filter to remove paths with many nodes in network
-		i = 0
-		while i < len(possible_paths):
-			inter = len(set(possible_paths[i][1]) & set(self._network.nodes))
-			if inter > 1 and len(possible_paths) > 1:
-				possible_paths.remove(possible_paths[i])
-				i -= 1
-			i += 1
-		sorted_paths = sorted(possible_paths, key=lambda tup: tup[2])
-		if len(sorted_paths) <= 0:
-			print("issue")
-			print("issue")
-			print("issue")
-		# if optimal_path[2] == 0:
-		# 	optimal_path = sorted_paths[1]
-		optimal_path = sorted_paths[0]
-		optimal_path[1].reverse()
-		return optimal_path[1]
+		if not self.has_won():
+			paths = networkx.single_source_dijkstra(game_board.get_map(), self._target_cities[0], weight='weight')
+			paths = self.collapse_paths(paths)
+			possible_paths = []
+			for path in paths:
+				if (path[1][len(path[1]) - 1] in self._network.nodes) and path[2] != 0:
+					possible_paths.append(path)
+			# path filter to remove paths with many nodes in network
+			i = 0
+			while i < len(possible_paths):
+				inter = len(set(possible_paths[i][1]) & set(self._network.nodes))
+				if inter > 1 and len(possible_paths) > 1:
+					possible_paths.remove(possible_paths[i])
+					i -= 1
+				i += 1
+			sorted_paths = sorted(possible_paths, key=lambda tup: tup[2])
+			if len(sorted_paths) <= 0:
+				return self.get_next_path(game_board)
+			optimal_path = sorted_paths[0]
+			optimal_path[1].reverse()
+			return optimal_path[1]
+		else:
+			return "w"
 
 	@staticmethod
 	def collapse_paths(found_paths):

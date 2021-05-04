@@ -45,11 +45,14 @@ class TransEuropa:
 					valid = 0
 					while valid < 2 and not player.has_won():
 						co_ords = player.make_move(self.__board)
+						if co_ords == "w":
+							break
 						if self.__board.is_valid_move(player, co_ords):
 							player.add_node_to_network(self.__board, co_ords)
 							valid += 1
 				else:
 					game_won = True
+					break
 				if self.draw >= 2:
 					self.draw_board()
 		self.end_game(self.turn_count)
