@@ -132,7 +132,7 @@ class ClosestFirst(Player):
 
 	def make_move(self, game_board: GameBoard) -> [str, str]:  # node to add to network should always be first
 		self._current_path = self.get_next_path(game_board)
-		if self._current_path != "w":
+		if self._current_path != 'w':
 			# while self._current_path[1] in self._network.nodes:
 			# 	self._current_path.remove(self._current_path[0])
 			node_in_network_id = self._current_path[0].get_id()
@@ -140,7 +140,7 @@ class ClosestFirst(Player):
 			self._current_path.remove(self._current_path[0])
 			return [next_node_id, node_in_network_id]
 		else:
-			return "w"
+			return 'w'
 
 	def set_cities(self, cities):
 		Player.set_cities(self, cities)
@@ -172,7 +172,7 @@ class ClosestFirst(Player):
 			optimal_path[1].reverse()
 			return optimal_path[1]
 		else:
-			return "w"
+			return 'w'
 
 	@staticmethod
 	def collapse_paths(found_paths):

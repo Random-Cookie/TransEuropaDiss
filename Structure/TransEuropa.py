@@ -45,7 +45,7 @@ class TransEuropa:
 					valid = 0
 					while valid < 2 and not player.has_won():
 						co_ords = player.make_move(self.__board)
-						if co_ords == "w":
+						if co_ords == 'w':
 							game_won = True
 							break
 						else:
