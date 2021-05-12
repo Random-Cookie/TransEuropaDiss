@@ -18,14 +18,13 @@ class Node:
 
 
 class City(Node):
-	def __init__(self, node_id: str, data: [], colour: Colour):
+	def __init__(self, node_id: str, name: str, colour: Colour):
 		Node.__init__(self, node_id)
-		self.name = data[0]
-		self.colour = data[1]
-		self.colour = colour
+		self.__name = name
+		self.__colour = colour
 
 	def get_name(self) -> str:
-		return self.name
+		return self.__name
 
 	def get_colour(self) -> Colour:
-		return self.colour
+		return self.__colour

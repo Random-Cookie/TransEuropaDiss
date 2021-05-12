@@ -13,15 +13,15 @@ class GameBoard:
 		if node_id in cities.keys():
 			colour = cities.get(node_id)[1]
 			if colour == "blue":
-				node = City(node_id, cities.get(node_id), Colour.blue)
+				node = City(node_id, cities.get(node_id)[0], Colour.blue)
 			elif colour == "red":
-				node = City(node_id, cities.get(node_id), Colour.red)
+				node = City(node_id, cities.get(node_id)[0], Colour.red)
 			elif colour == "orange":
-				node = City(node_id, cities.get(node_id), Colour.orange)
+				node = City(node_id, cities.get(node_id)[0], Colour.orange)
 			elif colour == "yellow":
-				node = City(node_id, cities.get(node_id), Colour.yellow)
+				node = City(node_id, cities.get(node_id)[0], Colour.yellow)
 			else:
-				node = City(node_id, cities.get(node_id), Colour.green)
+				node = City(node_id, cities.get(node_id)[0], Colour.green)
 			self._cities[node_id] = node
 			self.__map.add_node(node)
 		else:
@@ -39,7 +39,7 @@ class GameBoard:
 			self._edges[start.get_id() + end.get_id()] = (start, end, 1)
 
 	@staticmethod
-	def map_city_dict(city_list: str) -> dict:
+	def __map_city_dict(city_list: str) -> dict:
 		""" turn cities list into a dictionary
 		:param city_list: List of cities in form of a string from config file
 		:return: a dictionary of all cities where: node_id -> name
@@ -52,7 +52,7 @@ class GameBoard:
 		return city_dict
 
 	@staticmethod
-	def map_double_tracks(track_list: []) -> dict:
+	def __map_double_tracks(track_list: []) -> dict:
 		track_dict = {}
 		track_list = track_list.splitlines()
 		for track in track_list:
@@ -74,8 +74,8 @@ class GameBoard:
 		map_data = map_file.read().split('#')
 		# ":\n" denotes end of config title
 		rows = map_data[1].split(':\n')[1].splitlines()
-		cities = self.map_city_dict(map_data[2].split(':\n')[1])
-		double_tracks = self.map_double_tracks(map_data[3].split(':\n')[1])
+		cities = self.__map_city_dict(map_data[2].split(':\n')[1])
+		double_tracks = self.__map_double_tracks(map_data[3].split(':\n')[1])
 		# build map nodes and edges
 		for i in range(0, len(rows)):
 			# Add initial node for each row at starting position

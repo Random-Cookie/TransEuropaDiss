@@ -79,7 +79,7 @@ class Player:
 		print(self.name + " took a turn")
 		return ["0000", "0000"]
 
-	def has_won(self):
+	def has_won(self) -> bool:
 		"""Has won function, any override must return Player.has_won(self)
 
 		:return: if player has won
@@ -89,5 +89,14 @@ class Player:
 				return False
 		return True
 
-	def _score_path(self, a: Node, b: Node, game_board: GameBoard) -> int:
-		return nx.shortest_path_length(game_board.get_map(), a, b)
+	def _end_game_score(self, game_board: GameBoard) -> int:
+		score = 0
+		for city in self._cities:
+			if city not in self._network:
+				shortest_path = 999
+				for node in self._network:
+					path_len = nx.shortest_path_length(game_board, city, node)
+					if path_len < shortest_path:
+						shortest_path = path_len
+				score += shortest_path
+		return score

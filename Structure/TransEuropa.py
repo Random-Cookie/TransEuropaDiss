@@ -2,11 +2,13 @@ from Structure.GameBoard import GameBoard
 from Graphics.DrawLib import BasicNetworkDrawer
 import psychopy
 import networkx
+import random
 
 
 class TransEuropa:
 	def __init__(self, players: [], map_filepath: str, debug_level: int = 0, draw: int = 0):
 		self.__players = players
+		random.shuffle(self.__players)
 		self._map_filepath = map_filepath
 		self.__board = GameBoard(self.__players, self._map_filepath)
 		self.draw = draw
@@ -29,7 +31,6 @@ class TransEuropa:
 			player.reset()
 
 	def play_game(self):
-		# Players choose starting pos
 		for player in self.__board.get_players():
 			player.choose_start_pos(self.__board)
 		game_won = False
@@ -79,7 +80,6 @@ class TransEuropa:
 				paths = networkx.single_source_dijkstra(self.__board, city, weight='weight')
 				paths = self.collapse_paths(paths, player)
 				# TODO
-
 
 	@staticmethod
 	def collapse_paths(found_paths, player):

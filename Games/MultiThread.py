@@ -29,31 +29,36 @@ class GameDriver:
 		player_names = []
 		for player in players:
 			player_names.append(player.name)
-		player_names.append("Draws")
-		games_won.append((games_won[0] + games_won[1]) - no_games)
+		score_dict = {}
+		for i in range(len(player_names)):
+			score_dict[player_names[i]] = games_won[i]
+		score_dict["Draws"] = games_won[0] + games_won[1] - no_games
 		if invalid_games:
 			print("+++++++++")
 			print("+INVALID+")
 			print("+++++++++")
-		return [player_names, games_won, invalid_games, turns / self.games_per_process]
+		return [score_dict, invalid_games, turns / self.games_per_process]
 
 	def aggregate_results(self, res_to_agg):
-		players = res_to_agg[0][0]
-		scores = [0] * len(players)
+		players = list(res_to_agg[0][0].keys())
+		scores = {}
+		for player in players:
+			scores[player] = 0
 		turns = 0
 		inv_games = 0
 		for res in res_to_agg:
 			for i in range(0, len(players)):
-				scores[i] += res[1][i]
-			inv_games += res[2]
-			turns += res[3]
+				scores[players[i]] += res[0].get(players[i])
+			inv_games += res[1]
+			turns += res[2]
 		if len(players) > 3:
 			players.remove(players[len(players) - 1])
-			scores.remove(scores[len(scores) - 1])
+			scores.pop("Draws")
 		else:
-			draws = scores[len(scores) - 1]
-			for i in range(0, len(scores) - 1):
-				scores[i] -= draws
+			draws = scores.get("Draws")
+			for key in scores.keys():
+				if key != "Draws":
+					scores[key] -= draws
 		return [players, scores, inv_games, turns / self.no_processes]
 
 	def __init__(self, map_filepath: str, processes: int, games_per_process: int, debug_level: int, draw: int,
@@ -97,8 +102,8 @@ class GameDriver:
 					results = self.aggregate_results(results)
 		else:
 			results = self.run_games(params[0][0], params[0][1], params[0][2])
-		total_games = self.games_per_process * self.no_processes
 		# printed /logfile output
+		total_games = self.games_per_process * self.no_processes
 		file_id = str((datetime.datetime.now() - datetime.datetime(1970, 1, 1)).total_seconds())
 		title = params[0][1][0].name + " Vs. " + params[0][1][1].name + " (" + str(total_games) + " Games)"
 		time_taken = datetime.datetime.now() - start_time
@@ -106,7 +111,7 @@ class GameDriver:
 		sb = "--------------------" + title + "--------------------\n"
 		sb += "Player Wins:\n"
 		for i in range(0, len(results[0])):
-			sb += "    " + results[0][i] + ": " + str(results[1][i]) + "  (" + str((results[1][i] / total_games) * 100) + "%)" + '\n'
+			sb += "    " + results[0][i] + ": " + str(results[1].get(results[0][i])) + " (" + str((results[1].get(results[0][i]) / total_games) * 100) + "%)" + '\n'
 		sb += "Average Turns: " + str(results[3]) + '\n'
 		sb += "Invalid Games: " + str(results[2]) + '\n'
 		sb += "Total Time: " + str(time_taken) + '\n'
@@ -128,8 +133,8 @@ class GameDriver:
 		# plot
 		labels = []
 		for i in range(0, len(results[0])):
-			labels.append(str(results[1][i]) + " (" + str(round((results[1][i] / total_games) * 100, 2)) + "%)")
-		plt.pie(results[1], labels=labels)
+			labels.append(str(results[1].get(results[0][i])) + " (" + str(round((results[1].get(results[0][i]) / total_games) * 100, 2)) + "%)")
+		plt.pie(results[1].values(), labels=labels)
 		title = ""
 		for i in range(0, len(players)):
 			if i != len(players) - 1:
@@ -139,6 +144,6 @@ class GameDriver:
 
 		title += "(" + str(total_games) + ")"
 		plt.title(title)
-		plt.legend(results[0], loc='center left', bbox_to_anchor=(0.98, 0.1))
-		plt.savefig("out/figs/" + file_id + ".png")
+		plt.legend(results[0], loc=2, bbox_to_anchor=(0.95, 0.6))
+		plt.savefig("out/figs/" + file_id + ".png", bbox_inches='tight')
 		plt.show()
